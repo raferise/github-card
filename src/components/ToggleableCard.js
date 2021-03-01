@@ -6,23 +6,24 @@ import GithubAPI from '../apis/GithubAPI';
 
 function ToggleableCard(props) {
     const [showUser, setShowUser] = useState(false);
-    const [userData, setUserData] = useState({fetched:false});
+    const [userData, setUserData] = useState({});
 
     useEffect(() => {
-        GithubAPI.getUser(props.username).then((user) => {
-            user.fetched = true;
-            setUserData(user);
-            console.log(user);
-        });
-    }, [props.username]);
+        if (showUser && props.username !== userData.login) {
+            GithubAPI.getUser(props.username).then((user) => {
+                user.fetched = true;
+                setUserData(user);
+            });
+        }
+    }, [props.username, userData.login, showUser]);
 
-    function toggle() {
+    function handleToggle() {
         setShowUser(state => !state);
     }
 
     return (
         <>
-            <Button variant="primary" onClick={toggle}>Toggle Card</Button>
+            <Button variant="primary" onClick={handleToggle}>Toggle Card</Button>
             {showUser && 
                 <Card style={{ width: '18rem' }}>
                     <Card.Img variant="top" src={userData.avatar_url} />
