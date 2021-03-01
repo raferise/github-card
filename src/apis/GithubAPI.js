@@ -9,6 +9,12 @@ const GithubAPI = {
             }
         } catch (error) {
             console.error("Error obtaining user data", error);
+            return ({
+                name:"Error",
+                login:error.message,
+                bio:"Something went wrong :(",
+                
+            })
         }
     }
 }
