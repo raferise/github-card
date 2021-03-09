@@ -1,7 +1,7 @@
 const GithubAPI = {
     getUser: async function(username) {
-        let resp = await fetch(`https://api.github.com/users/${username}`);
         try {
+            let resp = await fetch(`https://api.github.com/users/${username}`);
             if (resp.ok) {
                 return await resp.json();
             } else {
