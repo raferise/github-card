@@ -6,20 +6,36 @@ import FormControl from 'react-bootstrap/FormControl';
 import Button from 'react-bootstrap/Button';
 import ListGroup from 'react-bootstrap/ListGroup';
 import GithubAPI from './apis/GithubAPI';
-import {useState, useRef} from 'react';
+import { useState, useRef } from 'react';
+import { getDebouncer } from "./apis/DebounceAPI";
 
 
 function App() {
+  //form holds current text input value {current} and last submitted value {final}
   const [form, setForm] = useState({final:"infinitymeme",current:""});
-  const suggestionsBox = useRef();
-  const [suggestions, setSuggestions] = useState([]);
+  const suggestionsBox = useRef(); //component ref for manual sizing for transitions
+  const formInput = useRef(); //component ref for checking if focused
+  const [suggestions, setSuggestions] = useState([]); //array of search results for username suggestions
 
+  //use a ref so the timers persist thru renders
+  //unfortunately it makes it kinda ugly to call since you add a .current but that's just react
+  const getSuggestions = useRef(getDebouncer(loadSuggestions, 500));
+  function loadSuggestions(partialUsername) {
+    if (partialUsername) GithubAPI.getSuggestions(partialUsername).then(suggs => {
+      setSuggestions(suggs);
+      //only update (re-expand to fit) suggestions box if input is still focused after async fetching
+      if (formInput.current === document.activeElement) {
+        handleFocusIn()
+      };
+    });
+  }
+  
   function handleFormChange(event) {
     setForm((form) => ({...form, current:event.target.value}));
+    getSuggestions.current(event.target.value);
   }
   function finalize() {
     setForm((form) => ({...form, final:form.current}));
-    GithubAPI.getSuggestions(form.current).then(r => setSuggestions(r));
   }
   function handleUseSuggestion(event) {
     setForm({final:event.target.innerText, current:event.target.innerText});
@@ -45,6 +61,8 @@ function App() {
       <InputGroup className="mb-3" onKeyPress={handleKeyPress}>
           <ListGroup className="suggestions" ref={suggestionsBox}>
             {suggestions.items && suggestions.items.map(user => ( 
+              // use mouse down instead of click since blur happens on mouse down, not mouse up
+              // causing the box to minimize
               <ListGroup.Item action onMouseDown={handleUseSuggestion} key={user.id}>
                 {user.login}
               </ListGroup.Item>
@@ -54,6 +72,7 @@ function App() {
           onChange={handleFormChange}
           onFocus={handleFocusIn}
           onBlur={handleFocusOut}
+          ref={formInput}
           placeholder="Github username"
           aria-label="Github username"
           aria-describedby="basic-addon2"
