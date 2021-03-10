@@ -16,6 +16,25 @@ const GithubAPI = {
                 
             })
         }
-    }
+    },
+    getSuggestions: async function(partialUsername) {
+        try {
+            let resp = await fetch(`https://api.github.com/search/users?q=${partialUsername}&per_page=10`);
+            if (resp.ok) {
+                return await resp.json();
+            } else {
+                throw Error(resp.status);
+            }
+        } catch (error) {
+            console.error("Error obtaining suggestions", error);
+            return ({
+                items:[
+                    {
+                        login:"Error "+error.message
+                    }
+                ]
+            });
+        }
+    },
 }
 export default GithubAPI;

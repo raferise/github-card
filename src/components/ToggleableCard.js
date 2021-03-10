@@ -25,13 +25,13 @@ function ToggleableCard(props) {
         <>
             <Button variant="primary" onClick={handleToggle}>Toggle Card</Button>
             {showUser && 
-                <Card style={{ width: '18rem' }}>
+                <Card className="github-card">
                     <Card.Img variant="top" src={userData.avatar_url} />
                     {(userData.fetched ? 
                         <>
                             <Card.Body>
                                 <Card.Title>{userData.name}</Card.Title>
-                                <Card.Subtitle className="text-muted" style={{marginBottom:".25rem"}}>{userData.login}</Card.Subtitle>
+                                <Card.Subtitle className="text-muted">{userData.login}</Card.Subtitle>
                                 <Card.Text>
                                     {userData.bio ? userData.bio : "Github user"}
                                 </Card.Text>
@@ -42,8 +42,8 @@ function ToggleableCard(props) {
                             </Card.Footer>
                         </>
                         :
-                        <div style={{display:"flex", justifyContent:"center"}}>
-                            <Spinner animation="border" role="status" style={{textAlign: "center"}}>
+                        <div className="spinner-container">
+                            <Spinner animation="border" role="status">
                                 <span className="sr-only">Loading...</span>
                             </Spinner>
                         </div>)
