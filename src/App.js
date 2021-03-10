@@ -6,7 +6,7 @@ import FormControl from 'react-bootstrap/FormControl';
 import Button from 'react-bootstrap/Button';
 import ListGroup from 'react-bootstrap/ListGroup';
 import GithubAPI from './apis/GithubAPI';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { getDebouncer } from "./apis/DebounceAPI";
 
 
@@ -16,6 +16,7 @@ function App() {
   const suggestionsBox = useRef(); //component ref for manual sizing for transitions
   const formInput = useRef(); //component ref for checking if focused
   const [suggestions, setSuggestions] = useState([]); //array of search results for username suggestions
+  const [showSuggestions, setShowSuggestions] = useState(true);
 
   //use a ref so the timers persist thru renders
   //unfortunately it makes it kinda ugly to call since you add a .current but that's just react
@@ -23,42 +24,54 @@ function App() {
   function loadSuggestions(partialUsername) {
     if (partialUsername) GithubAPI.getSuggestions(partialUsername).then(suggs => {
       setSuggestions(suggs);
-      //only update (re-expand to fit) suggestions box if input is still focused after async fetching
-      if (formInput.current === document.activeElement) {
-        handleFocusIn()
-      };
     });
   }
   
   function handleFormChange(event) {
     setForm((form) => ({...form, current:event.target.value}));
+    setShowSuggestions(true);
     getSuggestions.current(event.target.value);
   }
   function finalize() {
     setForm((form) => ({...form, final:form.current}));
+    setShowSuggestions(false);
   }
   function handleUseSuggestion(event) {
     setForm({final:event.target.innerText, current:event.target.innerText});
   }
-  function handleKeyPress(event) {
-    if (event.code === "Enter") finalize();
+  function handleKeyDown(event) {
+    if (event.code === "Enter") {
+      finalize();
+    } else if (event.code === "Tab") {
+      handleFocusIn();
+      event.preventDefault();
+    }
   }
+  useEffect(() => {
+    //handles animations on search bar
+    if (showSuggestions) {
+      suggestionsBox.current.style.transitionDuration = "0"; //disable transitions
+      suggestionsBox.current.style.height = "auto"; //calc auto height
+      let h = suggestionsBox.current.clientHeight; //store auto height
+      suggestionsBox.current.style.height = "0px"; //back to 0
+      suggestionsBox.current.style.transitionDuration = ""; //enable transitions
+      if (!suggestionsBox.current.clientHeight) //eval of clientHeight for transition
+      suggestionsBox.current.style.height = h+"px"; //apply auto height and watch the transition fly
+    } else {
+      suggestionsBox.current.style.height = "0px";
+    }
+  }, [showSuggestions, suggestions])
+
   function handleFocusIn(event) {
-    suggestionsBox.current.style.transitionDuration = "0"; //disable transitions
-    suggestionsBox.current.style.height = "auto"; //calc auto height
-    let h = suggestionsBox.current.clientHeight; //store auto height
-    suggestionsBox.current.style.height = "0px"; //back to 0
-    suggestionsBox.current.style.transitionDuration = ""; //enable transitions
-    if (!suggestionsBox.current.clientHeight) //eval of clientHeight for transition
-    suggestionsBox.current.style.height = h+"px"; //apply auto height and watch the transition fly
+    setShowSuggestions(true);
   }
   function handleFocusOut(event) {
-    suggestionsBox.current.style.height = "0px";
+    setShowSuggestions(false);
   }
 
   return (
     <div className="App">
-      <InputGroup className="mb-3" onKeyPress={handleKeyPress}>
+      <InputGroup className="mb-3" onKeyDown={handleKeyDown}>
           <ListGroup className="suggestions" ref={suggestionsBox}>
             {suggestions.items && suggestions.items.map(user => ( 
               // use mouse down instead of click since blur happens on mouse down, not mouse up
@@ -72,6 +85,7 @@ function App() {
           onChange={handleFormChange}
           onFocus={handleFocusIn}
           onBlur={handleFocusOut}
+          onClick={handleFocusIn}
           ref={formInput}
           placeholder="Github username"
           aria-label="Github username"
