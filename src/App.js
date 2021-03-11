@@ -15,7 +15,6 @@ function App() {
   //form holds current text input value {current} and last submitted value {final}
   const [form, setForm] = useState({final:"infinitymeme",current:""});
   const suggestionsBox = useRef(); //component ref for manual sizing for transitions
-  const formInput = useRef(); //component ref for checking if focused
   const [suggestions, setSuggestions] = useState([]); //array of search results for username suggestions
   const [showSuggestions, setShowSuggestions] = useState(true);
 
@@ -90,7 +89,6 @@ function App() {
           onFocus={handleFocusIn}
           onBlur={handleFocusOut}
           onClick={handleFocusIn}
-          ref={formInput}
           placeholder="Github username"
           aria-label="Github username"
           aria-describedby="basic-addon2"
