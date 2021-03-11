@@ -1,6 +1,7 @@
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ToggleableCard from './components/ToggleableCard';
+import GithubCard from './components/GithubCard';
 import InputGroup from 'react-bootstrap/InputGroup';
 import FormControl from 'react-bootstrap/FormControl';
 import Button from 'react-bootstrap/Button';
@@ -96,6 +97,8 @@ function App() {
         </InputGroup.Append>
         
       </InputGroup>
+      <GithubCard username={form.final}></GithubCard>
+      <h3>Toggleable Version:</h3>
       <ToggleableCard username={form.final}></ToggleableCard>
     </div>
   );
