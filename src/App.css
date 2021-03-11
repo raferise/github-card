@@ -10,8 +10,9 @@
   width: 100%;
   top: 100%;
   overflow: hidden;
-  transition: all 0.25s ease;
+  transition: height 0.25s ease;
   z-index: 1;
+  background-color: #fff;
 }
 
 .github-card {

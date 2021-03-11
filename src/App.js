@@ -51,13 +51,16 @@ function App() {
   useEffect(() => {
     //handles animations on search bar
     if (showSuggestions) {
+      //workaround for the fact that height:auto doesn't have transitions
+      let preHeight = suggestionsBox.current.clientHeight;
       suggestionsBox.current.style.transitionDuration = "0"; //disable transitions
-      suggestionsBox.current.style.height = "auto"; //calc auto height
-      let h = suggestionsBox.current.clientHeight; //store auto height
-      suggestionsBox.current.style.height = "0px"; //back to 0
+      suggestionsBox.current.style.height = "auto"; //calc auto height (what it should be)
+      let autoHeight = suggestionsBox.current.clientHeight;
+      suggestionsBox.current.style.height = preHeight+"px"; //back to what it was
       suggestionsBox.current.style.transitionDuration = ""; //enable transitions
-      if (!suggestionsBox.current.clientHeight) //eval of clientHeight for transition
-      suggestionsBox.current.style.height = h+"px"; //apply auto height and watch the transition fly
+      if (suggestionsBox.current.clientHeight || true) { //forces re-eval of clientHeight for css transition, wrapped in if so ESLint doesn't complain about unused expressions
+        suggestionsBox.current.style.height = autoHeight+"px"; //apply auto height and watch the transition fly
+      }
     } else {
       suggestionsBox.current.style.height = "0px";
     }
